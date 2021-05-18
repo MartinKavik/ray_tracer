@@ -11,28 +11,14 @@ use sphere::Sphere;
 use camera::Camera;
 use rand::Rng;
 
-fn hit_sphere(center: Point3, radius: f64, r: &Ray) -> f64 {
-    let oc = r.origin() - center;
-    let a = r.direction().length().powi(2);
-    let half_b = oc.dot(r.direction());
-    let c = oc.length().powi(2) - radius * radius;
-    let discriminant = half_b * half_b - a * c;
-
-    if discriminant < 0.0 {
-        -1.0
-    } else {
-        (-half_b - discriminant.sqrt()) / a
-    }
-}
-
 fn ray_color(r: &Ray, world: &World, depth: u64) -> Color {
     if depth <= 0 {
         // If we've exceeded the ray bounce limit, no more light is gathered
         return Color::new(0.0, 0.0, 0.0);
     }
 
-    if let Some(rec) = world.hit(r, 0.0, f64::INFINITY) {
-        let target = rec.p + rec.normal + Vec3::random_in_unit_sphere();
+    if let Some(rec) = world.hit(r, 0.001, f64::INFINITY) {
+        let target = rec.p + rec.normal + Vec3::random_in_unit_sphere().normalized();
         let r = Ray::new(rec.p, target - rec.p);
         0.5 * ray_color(&r, world, depth - 1)
     } else {
