@@ -12,13 +12,14 @@ use sphere::Sphere;
 use camera::Camera;
 use rand::Rng;
 use material::{Lambertian, Metal, Dielectric};
-use std::rc::Rc;
+use std::sync::Arc;
+use rayon::prelude::*;
 
 fn random_scene() -> World {
     let mut rng = rand::thread_rng();
     let mut world = World::new();
 
-    let ground_mat = Rc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
+    let ground_mat = Arc::new(Lambertian::new(Color::new(0.5, 0.5, 0.5)));
     let ground_sphere = Sphere::new(Point3::new(0.0, -1000.0, 0.0), 1000.0, ground_mat);
 
     world.push(Box::new(ground_sphere));
@@ -33,7 +34,7 @@ fn random_scene() -> World {
             if choose_mat < 0.8 {
                 // Diffuse
                 let albedo = Color::random(0.0..1.0) * Color::random(0.0..1.0);
-                let sphere_mat = Rc::new(Lambertian::new(albedo));
+                let sphere_mat = Arc::new(Lambertian::new(albedo));
                 let sphere = Sphere::new(center, 0.2, sphere_mat);
 
                 world.push(Box::new(sphere));
@@ -41,13 +42,13 @@ fn random_scene() -> World {
                 // Metal
                 let albedo = Color::random(0.4..1.0);
                 let fuzz = rng.gen_range(0.0..0.5);
-                let sphere_mat = Rc::new(Metal::new(albedo, fuzz));
+                let sphere_mat = Arc::new(Metal::new(albedo, fuzz));
                 let sphere = Sphere::new(center, 0.2, sphere_mat);
 
                 world.push(Box::new(sphere));
             } else {
                 // Glass
-                let sphere_mat = Rc::new(Dielectric::new(1.5));
+                let sphere_mat = Arc::new(Dielectric::new(1.5));
                 let sphere = Sphere::new(center, 0.2, sphere_mat);
 
                 world.push(Box::new(sphere));
@@ -55,9 +56,9 @@ fn random_scene() -> World {
         }
     }
 
-    let mat1 = Rc::new(Dielectric::new(1.5));
-    let mat2 = Rc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)));
-    let mat3 = Rc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
+    let mat1 = Arc::new(Dielectric::new(1.5));
+    let mat2 = Arc::new(Lambertian::new(Color::new(0.4, 0.2, 0.1)));
+    let mat3 = Arc::new(Metal::new(Color::new(0.7, 0.6, 0.5), 0.0));
 
     let sphere1 = Sphere::new(Point3::new(0.0, 1.0, 0.0), 1.0, mat1);
     let sphere2 = Sphere::new(Point3::new(-4.0, 1.0, 0.0), 1.0, mat2);
@@ -119,12 +120,13 @@ fn main() -> () {
     println!("{} {}", IMAGE_WIDTH, IMAGE_HEIGHT);
     println!("255");
 
-    let mut rng = rand::thread_rng();
     for j in (0..IMAGE_HEIGHT).rev() {
-        eprintln!("Scanlines remaining: {}", j);
-        for i in 0..IMAGE_WIDTH {
+        eprintln!("Scanlines remaining: {}", j + 1);
+
+        let scanline: Vec<Color> = (0..IMAGE_WIDTH).into_par_iter().map(|i| {
             let mut pixel_color = Color::new(0.0, 0.0, 0.0);
             for _ in 0..SAMPLES_PER_PIXEL {
+                let mut rng = rand::thread_rng();
                 let random_u: f64 = rng.gen();
                 let random_v: f64 = rng.gen();
 
@@ -135,6 +137,10 @@ fn main() -> () {
                 pixel_color += ray_color(&r, &world, MAX_DEPTH);
             }
 
+            pixel_color
+        }).collect();
+
+        for pixel_color in scanline {
             println!("{}", pixel_color.format_color(SAMPLES_PER_PIXEL));
         }
     }

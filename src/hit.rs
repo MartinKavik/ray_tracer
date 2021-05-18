@@ -1,12 +1,12 @@
 use super::vec::{Vec3, Point3};
 use super::ray::Ray;
 use super::material::Scatter;
-use std::rc::Rc;
+use std::sync::Arc;
 
 pub struct HitRecord {
     pub p: Point3,
     pub normal: Vec3,
-    pub mat: Rc<dyn Scatter>,
+    pub mat: Arc<dyn Scatter>,
     pub t: f64,
     pub front_face: bool,
 }
@@ -22,7 +22,7 @@ impl HitRecord {
     }
 }
 
-pub trait Hit {
+pub trait Hit: Send + Sync {
     fn hit(&self, r: &Ray, t_min: f64, t_max: f64) -> Option<HitRecord>;
 }
 
