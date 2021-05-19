@@ -20,5 +20,5 @@ features = [
 ]
 
 [package.metadata.wasm-pack.profile.release]
-wasm-opt = ['-Oz']
+wasm-opt = ['-O4']
 

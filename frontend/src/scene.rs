@@ -14,8 +14,8 @@ pub fn scene() -> World {
 
     world.push(Box::new(ground_sphere));
 
-    for a in -6..=6 {
-        for b in -6..=6 {
+    for a in -2..=2 {
+        for b in -2..=2 {
             let choose_mat: f64 = rng.gen();
             let center = Point3::new((a as f64) + rng.gen_range(0.0..0.9),
                                      0.2,

@@ -1,8 +1,10 @@
 # Raytracer on MoonZoon 
 
-Raytracer is implemented according to the tutorial [Ray Tracing in One Weekend](https://misterdanb.github.io/raytracinginrust/).
+Raytracer is implemented according to the tutorial [Ray Tracing in One Weekend](https://misterdanb.github.io/raytracinginrust/). It's a bit slow and single-threaded, but useful for learning.
 
-[MoonZoon](http://moonzoon.rs/) is a Rust Fullstack Framework.
+[MoonZoon](http://moonzoon.rs/) is a Rust Fullstack Framework. It renders the HTML canvas and provides a server with auto-reloading for fast dev iteration loop.
+
+![Rendered image](rendered_image.png)
 
 ---
 
@@ -30,6 +32,18 @@ Raytracer is implemented according to the tutorial [Ray Tracing in One Weekend](
 ---
 
 ## Problems in the tutorial
+
+1. Rotated image in some tutorial steps. Replace
+    ```rust
+    for j in 0..IMAGE_HEIGHT {
+        eprintln!("Scanlines remaining: {}", IMAGE_HEIGHT - j - 1);
+    ```
+    with
+    ```rust
+    for j in (0..IMAGE_HEIGHT).rev() {
+        eprintln!("Scanlines remaining: {}", j + 1);
+    ```
+    
 
 1. Missing `Vec3` impl:
     ```rust
@@ -63,7 +77,7 @@ Raytracer is implemented according to the tutorial [Ray Tracing in One Weekend](
 
 - The `random_scene` function has been moved to `scene.rs` and renamed to `scene`.
 
-- The `ray_color` function has been moved to ray.rs` as `Ray::color`.
+- The `ray_color` function has been moved to `ray.rs` as `Ray::color`.
 
 - `main.rs` rewritten to `lib.rs`.
 
