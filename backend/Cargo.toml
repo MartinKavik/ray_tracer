@@ -1,0 +1,8 @@
+[package]
+version = "0.1.0"
+name = "backend"
+authors = ["Martin Kavík <martin@kavik.cz>"]
+edition = "2018"
+
+[dependencies]
+moon = { git = "https://github.com/MoonZoon/MoonZoon", rev = "a6f5070" }

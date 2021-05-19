@@ -1,2 +1,2 @@
-/target
-image.ppm
+**/target
+cargo_install_root

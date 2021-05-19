@@ -1,0 +1,18 @@
+port = 8080
+# port = 8443
+https = false
+cache_busting = true
+
+[redirect_server]
+port = 8081
+enabled = false
+
+[watch]
+frontend = [
+    "frontend/Cargo.toml",
+    "frontend/src",
+]
+backend = [
+    "backend/Cargo.toml",
+    "backend/src",
+]
