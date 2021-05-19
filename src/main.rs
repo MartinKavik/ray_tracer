@@ -24,8 +24,8 @@ fn random_scene() -> World {
 
     world.push(Box::new(ground_sphere));
 
-    for a in -11..=11 {
-        for b in -11..=11 {
+    for a in -2..=2 {
+        for b in -2..=2 {
             let choose_mat: f64 = rng.gen();
             let center = Point3::new((a as f64) + rng.gen_range(0.0..0.9),
                                      0.2,
@@ -93,17 +93,17 @@ fn ray_color(r: &Ray, world: &World, depth: u64) -> Color {
 fn main() -> () {
     // Image
     const ASPECT_RATIO: f64 = 3.0 / 2.0;
-    const IMAGE_WIDTH: u64 = 1200;
+    const IMAGE_WIDTH: u64 = 600;
     const IMAGE_HEIGHT: u64 = ((IMAGE_WIDTH as f64) / ASPECT_RATIO) as u64;
-    const SAMPLES_PER_PIXEL: u64 = 500;
+    const SAMPLES_PER_PIXEL: u64 = 30;
     const MAX_DEPTH: u64 = 50;
 
     // World
     let world = random_scene();
 
     // Camera
-    let lookfrom = Point3::new(13.0, 2.0, 3.0);
-    let lookat = Point3::new(0.0, 0.0, 0.0);
+    let lookfrom = Point3::new(13.0, 3.0, 3.0);
+    let lookat = Point3::new(0.0, 0.5, 0.0);
     let vup = Vec3::new(0.0, 1.0, 0.0);
     let dist_to_focus = 10.0;
     let aperture = 0.1;
