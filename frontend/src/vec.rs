@@ -63,7 +63,7 @@ impl Vec3 {
         let ig = (256.0 * (self[1] / (samples_per_pixel as f64)).sqrt().clamp(0.0, 0.999)) as u64;
         let ib = (256.0 * (self[2] / (samples_per_pixel as f64)).sqrt().clamp(0.0, 0.999)) as u64;
     
-        format!("{} {} {}", ir, ig, ib)
+        format!("rgb({}, {}, {})", ir, ig, ib)
     }
 
     pub fn near_zero(self) -> bool {

@@ -1,11 +1,3 @@
-use zoon::{*, println};
-
-use vec::{Vec3, Point3, Color};
-use ray::Ray;
-use camera::Camera;
-use rand::Rng;
-use rayon::prelude::*;
-
 mod ray;
 mod vec;
 mod hit;
@@ -14,36 +6,53 @@ mod camera;
 mod material;
 mod scene;
 
+use zoon::{*, println};
+use vec::{Vec3, Point3, Color};
+use ray::Ray;
+use camera::Camera;
+use rand::Rng;
 use scene::scene;
 
-// ------ ------
-//    Statics 
-// ------ ------
-
-// ------ ------
-//    Signals 
-// ------ ------
-
-// ------ ------
-//   Commands 
-// ------ ------
-
-// ------ ------
-//     View 
-// ------ ------
+// Image
+const ASPECT_RATIO: f64 = 3.0 / 2.0;
+const IMAGE_WIDTH: u64 = 600;
+const IMAGE_HEIGHT: u64 = ((IMAGE_WIDTH as f64) / ASPECT_RATIO) as u64;
+const SAMPLES_PER_PIXEL: u64 = 50;
+const MAX_DEPTH: u64 = 50;
 
 fn root() -> impl Element {
-    Text::new("Hello!")
+    RawHtmlEl::new("canvas")
+        .attr("id", "canvas")
+        .attr("width", &IMAGE_WIDTH.to_string())
+        .attr("height", &IMAGE_HEIGHT.to_string())
 }
 
-fn main() -> () {
-    // Image
-    const ASPECT_RATIO: f64 = 3.0 / 2.0;
-    const IMAGE_WIDTH: u64 = 600;
-    const IMAGE_HEIGHT: u64 = ((IMAGE_WIDTH as f64) / ASPECT_RATIO) as u64;
-    const SAMPLES_PER_PIXEL: u64 = 30;
-    const MAX_DEPTH: u64 = 50;
+#[wasm_bindgen(start)]
+pub fn start() {
+    start_app("app", root);
 
+    let ctx = canvas_ctx();
+
+    let draw_pixel = |x: u64, y: u64, color: String| {
+        ctx.set_fill_style(&JsValue::from_str(&color));
+        ctx.fill_rect(x as f64, y as f64, 1., 1.);
+    };
+
+    draw(draw_pixel);
+}
+
+fn canvas_ctx() -> web_sys::CanvasRenderingContext2d {
+    document()
+        .get_element_by_id("canvas")
+        .map(|element| element.unchecked_into::<web_sys::HtmlCanvasElement>())
+        .unwrap_throw()
+        .get_context("2d")
+        .unwrap_throw()
+        .unwrap_throw()
+        .unchecked_into::<web_sys::CanvasRenderingContext2d>()
+}
+
+fn draw(draw_pixel: impl Fn(u64, u64, String)) -> () {
     // World
     let world = scene();
 
@@ -62,14 +71,10 @@ fn main() -> () {
                           aperture,
                           dist_to_focus);
 
-    println!("P3");
-    println!("{} {}", IMAGE_WIDTH, IMAGE_HEIGHT);
-    println!("255");
+    for j in 0..IMAGE_HEIGHT {
+        println!("Remaining lines: {}", IMAGE_HEIGHT - j);
 
-    for j in (0..IMAGE_HEIGHT).rev() {
-        eprintln!("Scanlines remaining: {}", j + 1);
-
-        let scanline: Vec<Color> = (0..IMAGE_WIDTH).into_par_iter().map(|i| {
+        for i in 0..IMAGE_WIDTH {
             let mut pixel_color = Color::new(0.0, 0.0, 0.0);
             for _ in 0..SAMPLES_PER_PIXEL {
                 let mut rng = rand::thread_rng();
@@ -81,23 +86,9 @@ fn main() -> () {
 
                 let r = cam.get_ray(u, v);
                 pixel_color += Ray::color(&r, &world, MAX_DEPTH);
+
             }
-
-            pixel_color
-        }).collect();
-
-        for pixel_color in scanline {
-            println!("{}", pixel_color.format_color(SAMPLES_PER_PIXEL));
+            draw_pixel(i, IMAGE_HEIGHT - j, pixel_color.format_color(SAMPLES_PER_PIXEL));
         }
     }
-}
-
-
-// ------ ------
-//     Start 
-// ------ ------
-
-#[wasm_bindgen(start)]
-pub fn start() {
-    start_app("app", root);
 }

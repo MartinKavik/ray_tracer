@@ -31,17 +31,6 @@ Raytracer is implemented according to the tutorial [Ray Tracing in One Weekend](
 
 ## Problems in the tutorial
 
-1. Rotated image. Replace
-    ```rust
-    for j in 0..IMAGE_HEIGHT {
-        eprintln!("Scanlines remaining: {}", IMAGE_HEIGHT - j - 1);
-    ```
-    with
-    ```rust
-    for j in (0..IMAGE_HEIGHT).rev() {
-        eprintln!("Scanlines remaining: {}", j + 1);
-    ```
-
 1. Missing `Vec3` impl:
     ```rust
     impl Mul<Vec3> for Vec3 {
